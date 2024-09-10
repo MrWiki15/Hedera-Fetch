@@ -1,0 +1,27 @@
+{
+  "name": "hedera-fetch",
+  "version": "1.0.1",
+  "description": "Search for any Hedera Network information in an Easy, Fast and Convenient way.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "test"
+  },
+  "keywords": [
+    "hedera",
+    "network",
+    "hedera",
+    "fetch",
+    "Polaris",
+    "polaris",
+    "web3"
+  ],
+  "author": "Polaris Web3",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "typescript": "^5.6.2"
+  }
+}

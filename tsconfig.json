@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    /* Lenguaje y entorno */
+    "target": "es2016" /* Elige la versión de ECMAScript para la salida de JavaScript. */,
+    "module": "ES2022" /* Elige el formato de módulo para la salida (ESM para compatibilidad moderna). */,
+
+    /* Emisión */
+    "outDir": "./dist" /* Carpeta de salida para los archivos compilados. */,
+    "declaration": true /* Genera archivos de declaración (.d.ts) para TypeScript. */,
+    "declarationDir": "./types" /* Carpeta de salida para archivos de declaración de tipos. */,
+    "sourceMap": true /* Genera archivos de mapa de fuentes para facilitar la depuración. */,
+
+    /* Interoperabilidad de módulos */
+    "esModuleInterop": true /* Facilita la importación de módulos CommonJS. */,
+
+    /* Chequeos estrictos */
+    "strict": true /* Habilita todas las opciones de verificación estricta para mayor seguridad en el código. */,
+
+    /* Organización del proyecto */
+    "forceConsistentCasingInFileNames": true /* Asegura que los nombres de archivo tengan la misma capitalización. */,
+
+    /* Otras configuraciones útiles */
+    "skipLibCheck": true /* Omite la verificación de tipos en archivos de declaración (.d.ts) de las dependencias para mejorar la velocidad de compilación. */
+  },
+
+  /* Incluir y excluir archivos */
+  "include": [
+    "src/**/*"
+  ] /* Incluye todos los archivos dentro de la carpeta `src`. */,
+  "exclude": [
+    "node_modules",
+    "dist"
+  ] /* Excluye la carpeta `node_modules` y la salida `dist` del proceso de compilación. */
+}
