@@ -135,7 +135,8 @@ export async function fetchAccount(account: string): Promise<any> {
     }
 
     const response = await fetch(`${mainetBaseUrl}api/v1/accounts/${account}`);
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(error);
     throw new Error("Error fetching account data");
@@ -154,7 +155,8 @@ export async function fetchAccountTokensAsociated(
     const response = await fetch(
       `${mainetBaseUrl}api/v1/accounts/${account}/tokens`
     );
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(error);
     throw new Error("Error fetching account tokens associated");
@@ -263,7 +265,8 @@ export async function fetchAccountRewards(account: string): Promise<any> {
     const response = await fetch(
       `${mainetBaseUrl}api/v1/accounts/${account}/rewards`
     );
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(error);
     throw new Error("Error fetching account rewards");
@@ -271,72 +274,375 @@ export async function fetchAccountRewards(account: string): Promise<any> {
 }
 
 //Balances
-export async function fetchBalances(): Promise<any> {
+export async function fetchBalances({
+  accountId,
+  accountIdOperator,
+  balance,
+  balanceOperator,
+  timestamp,
+  publicKey,
+  order = "desc",
+}: {
+  accountId?: string;
+  accountIdOperator?: "eq" | "lt" | "lte" | "gt" | "gte";
+  balance?: string;
+  balanceOperator?: "eq" | "lt" | "lte" | "gt" | "gte";
+  timestamp?: string;
+  publicKey?: string;
+  order?: "asc" | "desc";
+} = {}): Promise<any> {
   try {
-    const response = await fetch(`${mainetBaseUrl}api/v1/balances`);
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (accountId) {
+      if (
+        !["eq", "lt", "lte", "gt", "gte"].includes(accountIdOperator || "eq")
+      ) {
+        throw new Error("Invalid operator for 'accountId'.");
+      }
+      params[`account.id${accountIdOperator ? `=${accountIdOperator}` : ""}`] =
+        accountId;
+    }
+
+    if (balance) {
+      if (!["eq", "lt", "lte", "gt", "gte"].includes(balanceOperator || "eq")) {
+        throw new Error("Invalid operator for 'balance'.");
+      }
+      params[`account.balance${balanceOperator ? `=${balanceOperator}` : ""}`] =
+        balance;
+    }
+
+    if (timestamp) {
+      if (!/^\d+\.\d{9}$/.test(timestamp)) {
+        throw new Error(
+          "Invalid format for 'timestamp'. Must be in seconds.nanoseconds format."
+        );
+      }
+      params.timestamp = timestamp;
+    }
+
+    if (publicKey) {
+      if (typeof publicKey !== "string") {
+        throw new Error("Invalid format for 'publicKey'. Must be a string.");
+      }
+      params["account.publickey"] = publicKey;
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/balances${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching balances");
+    console.error("Error fetching balances:", error);
+    throw new Error("Error fetching balances: " + error);
   }
 }
 
 // Transactions
-export async function fetchTransactions(): Promise<any> {
+export async function fetchTransactions({
+  accountId,
+  accountIdOperator,
+  timestamp,
+  result,
+  transactionType,
+  order = "desc",
+}: {
+  accountId?: string;
+  accountIdOperator?: "eq" | "lt" | "lte" | "gt" | "gte";
+  timestamp?: string;
+  result?: "success" | "fail";
+  transactionType?: string;
+  order?: "asc" | "desc";
+} = {}): Promise<any> {
   try {
-    const response = await fetch(`${mainetBaseUrl}api/v1/transactions`);
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (accountId) {
+      if (
+        !["eq", "lt", "lte", "gt", "gte"].includes(accountIdOperator || "eq")
+      ) {
+        throw new Error("Invalid operator for 'accountId'.");
+      }
+      params[`account.id${accountIdOperator ? `=${accountIdOperator}` : ""}`] =
+        accountId;
+    }
+
+    if (timestamp) {
+      if (!/^\d+\.\d{9}$/.test(timestamp)) {
+        throw new Error(
+          "Invalid format for 'timestamp'. Must be in seconds.nanoseconds format."
+        );
+      }
+      params.timestamp = timestamp;
+    }
+
+    if (result) {
+      if (!["success", "fail"].includes(result)) {
+        throw new Error(
+          "Invalid value for 'result'. Must be 'success' or 'fail'."
+        );
+      }
+      params.result = result;
+    }
+
+    if (transactionType) {
+      params.transactionType = transactionType;
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/transactions${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching transactions");
+    console.error("Error fetching transactions:", error);
+    throw new Error("Error fetching transactions: " + error);
   }
 }
 
-export async function fetchTransactionsAccount(account: string): Promise<any> {
+export async function fetchTransactionsAccount(
+  account: string,
+  filters: {
+    timestamp?: string;
+    result?: "success" | "fail";
+    transactionType?: string;
+    order?: "asc" | "desc";
+  } = {}
+): Promise<any> {
   try {
-    // Si la cuenta no existe, se lanza una excepción
+    // Validar la cuenta
     if (!account) {
       throw new Error("Account is required");
     }
 
-    // Si la cuenta no empieza con 0.0, se lanza una excepción
     if (!account.startsWith("0.0")) {
       throw new Error("Account must start with 0.0");
     }
 
-    const response = await fetch(
-      `${mainetBaseUrl}api/v1/transactions/{account}`
-    );
-    return await response.json();
+    // Llamar a fetchTransactions con el accountId y filtros
+    return await fetchTransactions({
+      accountId: account,
+      accountIdOperator: "eq", // Buscar solo este ID
+      ...filters, // Pasar los otros filtros
+    });
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching transactions");
+    console.error("Error fetching transactions for account:", error);
+    throw new Error("Error fetching transactions for account: " + error);
   }
 }
 
 //Topics
-export async function fetchTopics(topicId: string): Promise<any> {
+export async function fetchTopicMessages(topicId: string): Promise<any> {
   try {
+    // Validar topicId
     if (!topicId) {
-      throw new Error("Topic id is required");
+      throw new Error("Topic id is required.");
     }
 
-    const response = await fetch(`${mainetBaseUrl}api/v1/topics/${topicId}`);
-    return await response.json();
+    // Verificar el formato del topicId
+    if (!/^0\.0\.\d+$/.test(topicId)) {
+      throw new Error(
+        "Invalid format for 'topicId'. Must be in the format '0.0.<number>'."
+      );
+    }
+
+    const response = await fetch(
+      `${mainetBaseUrl}api/v1/topics/${topicId}/messages`
+    );
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching topics");
+    console.error("Error fetching topic messages:", error);
+    throw new Error("Error fetching topic messages: " + error);
+  }
+}
+
+export async function fetchTopicMessageBySequenceNumber(
+  topicId: string,
+  sequenceNumber: number
+): Promise<any> {
+  try {
+    // Validar topicId
+    if (!topicId) {
+      throw new Error("Topic id is required.");
+    }
+
+    // Verificar el formato del topicId
+    if (!/^0\.0\.\d+$/.test(topicId)) {
+      throw new Error(
+        "Invalid format for 'topicId'. Must be in the format '0.0.<number>'."
+      );
+    }
+
+    // Validar sequenceNumber
+    if (sequenceNumber <= 0) {
+      throw new Error("Sequence number must be a positive integer.");
+    }
+
+    const response = await fetch(
+      `${mainetBaseUrl}api/v1/topics/${topicId}/messages/${sequenceNumber}`
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching topic message by sequence number:", error);
+    throw new Error(
+      "Error fetching topic message by sequence number: " + error
+    );
+  }
+}
+
+export async function fetchTopicMessageByTimestamp(
+  timestamp: string
+): Promise<any> {
+  try {
+    // Validar timestamp
+    if (!timestamp) {
+      throw new Error("Consensus timestamp is required.");
+    }
+
+    // Verificar formato del timestamp (seconds.nanoseconds)
+    if (!/^\d+\.\d{9}$/.test(timestamp)) {
+      throw new Error(
+        "Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'."
+      );
+    }
+
+    const response = await fetch(
+      `${mainetBaseUrl}api/v1/topics/messages/${timestamp}`
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching topic message by timestamp:", error);
+    throw new Error("Error fetching topic message by timestamp: " + error);
   }
 }
 
 // Tokens
-export async function fetchTokens(): Promise<any> {
+export async function fetchTokens({
+  publicKey,
+  accountId,
+  tokenId,
+  tokenIdOperator,
+  order = "desc",
+  limit,
+}: {
+  publicKey?: string;
+  accountId?: string;
+  tokenId?: string;
+  tokenIdOperator?: "eq" | "lt" | "lte" | "gt" | "gte";
+  order?: "asc" | "desc";
+  limit?: number;
+} = {}): Promise<any> {
   try {
-    const response = await fetch(`${mainetBaseUrl}api/v1/tokens`);
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (publicKey) {
+      params.publickey = publicKey;
+    }
+
+    if (accountId) {
+      if (!/^0\.0\.\d+$/.test(accountId)) {
+        throw new Error(
+          "Invalid format for 'accountId'. Must be in the format '0.0.<number>'."
+        );
+      }
+      params["account.id"] = accountId;
+    }
+
+    if (tokenId) {
+      if (!["eq", "lt", "lte", "gt", "gte"].includes(tokenIdOperator || "eq")) {
+        throw new Error("Invalid operator for 'tokenId'.");
+      }
+      params[`token.id${tokenIdOperator ? `=${tokenIdOperator}` : ""}`] =
+        tokenId;
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    if (limit) {
+      if (limit <= 0) {
+        throw new Error("Limit must be a positive number.");
+      }
+      params.limit = limit.toString();
+    }
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/tokens${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching tokens");
+    console.error("Error fetching tokens:", error);
+    throw new Error("Error fetching tokens: " + error);
   }
 }
 
@@ -347,46 +653,183 @@ export async function fetchToken(tokenId: string): Promise<any> {
     }
 
     const response = await fetch(`${mainetBaseUrl}api/v1/tokens/${tokenId}`);
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(error);
     throw new Error("Error fetching token");
   }
 }
 
-export async function fetchTokenBalances(tokenId: string): Promise<any> {
+export async function fetchTokenBalances(
+  tokenId: string,
+  {
+    accountId,
+    accountIdOperator,
+    accountBalance,
+    accountBalanceOperator,
+    timestamp,
+    order = "desc",
+  }: {
+    accountId?: string;
+    accountIdOperator?: "eq" | "lt" | "lte" | "gt" | "gte";
+    accountBalance?: string;
+    accountBalanceOperator?: "eq" | "lt" | "lte" | "gt" | "gte";
+    timestamp?: string;
+    order?: "asc" | "desc";
+  } = {}
+): Promise<any> {
   try {
+    // Validar tokenId
     if (!tokenId) {
-      throw new Error("Token id is required");
+      throw new Error("Token id is required.");
     }
 
-    const response = await fetch(
-      `${mainetBaseUrl}api/v1/tokens/${tokenId}/balances`
-    );
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (accountId) {
+      if (!/^0\.0\.\d+$/.test(accountId)) {
+        throw new Error(
+          "Invalid format for 'accountId'. Must be in the format '0.0.<number>'."
+        );
+      }
+      params[`account.id${accountIdOperator ? `=${accountIdOperator}` : ""}`] =
+        accountId;
+    }
+
+    if (accountBalance) {
+      if (
+        !["eq", "lt", "lte", "gt", "gte"].includes(
+          accountBalanceOperator || "eq"
+        )
+      ) {
+        throw new Error("Invalid operator for 'accountBalance'.");
+      }
+      params[
+        `account.balance${
+          accountBalanceOperator ? `=${accountBalanceOperator}` : ""
+        }`
+      ] = accountBalance;
+    }
+
+    if (timestamp) {
+      if (!/^\d+\.\d{9}$/.test(timestamp)) {
+        throw new Error(
+          "Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'."
+        );
+      }
+      params.timestamp = timestamp;
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/tokens/${tokenId}/balances${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching token balance");
+    console.error("Error fetching token balances:", error);
+    throw new Error("Error fetching token balances: " + error);
   }
 }
 
-export async function fetchTokenNfts(tokenId: string): Promise<any> {
+export async function fetchTokenNfts(
+  tokenId: string,
+  {
+    accountId,
+    limit,
+    order = "desc",
+    serialNumber,
+  }: {
+    accountId?: string;
+    limit?: number;
+    order?: "asc" | "desc";
+    serialNumber?: string;
+  } = {}
+): Promise<any> {
   try {
+    // Validar tokenId
     if (!tokenId) {
-      throw new Error("Token id is required");
+      throw new Error("Token id is required.");
     }
 
-    const response = await fetch(
-      `${mainetBaseUrl}api/v1/tokens/${tokenId}/nfts`
-    );
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (accountId) {
+      if (!/^0\.0\.\d+$/.test(accountId)) {
+        throw new Error(
+          "Invalid format for 'accountId'. Must be in the format '0.0.<number>'."
+        );
+      }
+      params["account.id"] = accountId;
+    }
+
+    if (limit) {
+      if (limit <= 0) {
+        throw new Error("Limit must be a positive number.");
+      }
+      params.limit = limit.toString();
+    }
+
+    if (serialNumber) {
+      params.serialnumber = serialNumber;
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/tokens/${tokenId}/nfts${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching token nfts");
+    console.error("Error fetching token NFTs:", error);
+    throw new Error("Error fetching token NFTs: " + error);
   }
 }
 
-export async function fetchTokenSerialNumber(
+export async function fetchTokenNftSerialNumber(
   tokenId: string,
   serialNumber: string
 ): Promise<any> {
@@ -402,7 +845,9 @@ export async function fetchTokenSerialNumber(
     const response = await fetch(
       `${mainetBaseUrl}api/v1/tokens/${tokenId}/nfts/${serialNumber}`
     );
-    return await response.json();
+
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(error);
     throw new Error("Error fetching token serial number");
@@ -411,35 +856,143 @@ export async function fetchTokenSerialNumber(
 
 export async function fetchNftTransactionHistory(
   tokenID: string,
-  serialNumber: string
+  serialNumber: string,
+  {
+    limit,
+    order = "desc",
+    timestamp,
+  }: {
+    limit?: number;
+    order?: "asc" | "desc";
+    timestamp?: string;
+  } = {}
 ): Promise<any> {
   try {
+    // Validar tokenID y serialNumber
     if (!tokenID) {
-      throw new Error("Nft id is required");
+      throw new Error("Nft id is required.");
+    }
+
+    if (!/^0\.0\.\d+$/.test(tokenID)) {
+      throw new Error(
+        "Invalid format for 'tokenID'. Must be in the format '0.0.<number>'."
+      );
     }
 
     if (!serialNumber) {
-      throw new Error("Serial number is required");
+      throw new Error("Serial number is required.");
     }
 
-    const response = await fetch(
-      `${mainetBaseUrl}api/v1/tokens/${tokenID}/nfts/${serialNumber}/transactions`
-    );
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (limit) {
+      if (limit <= 0) {
+        throw new Error("Limit must be a positive number.");
+      }
+      params.limit = limit.toString();
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    if (timestamp) {
+      if (!/^\d+\.\d{9}$/.test(timestamp)) {
+        throw new Error(
+          "Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'."
+        );
+      }
+      params.timestamp = timestamp;
+    }
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/tokens/${tokenID}/nfts/${serialNumber}/transactions${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching nft transaction history");
+    console.error("Error fetching NFT transaction history:", error);
+    throw new Error("Error fetching NFT transaction history: " + error);
   }
 }
 
 // Contracts
-export async function fetchContracts(): Promise<any> {
+export async function fetchContracts({
+  contractId,
+  limit,
+  order = "desc",
+}: {
+  contractId?: string;
+  limit?: number;
+  order?: "asc" | "desc";
+} = {}): Promise<any> {
   try {
-    const response = await fetch(`${mainetBaseUrl}api/v1/contracts`);
-    return await response.json();
+    // Validar y construir los parámetros de consulta
+    const params: Record<string, string> = {};
+
+    if (contractId) {
+      if (!/^0\.0\.\d+$/.test(contractId)) {
+        throw new Error(
+          "Invalid format for 'contractId'. Must be in the format '0.0.<number>'."
+        );
+      }
+      params["contract.id"] = contractId;
+    }
+
+    if (limit) {
+      if (limit <= 0) {
+        throw new Error("Limit must be a positive number.");
+      }
+      params.limit = limit.toString();
+    }
+
+    if (!["asc", "desc"].includes(order)) {
+      throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+    }
+    params.order = order;
+
+    // Construir la URL con los parámetros de consulta
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${mainetBaseUrl}api/v1/contracts${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    console.log("Request URL:", url); // Verifica la URL generada
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching contracts");
+    console.error("Error fetching contracts:", error);
+    throw new Error("Error fetching contracts: " + error);
   }
 }
 
