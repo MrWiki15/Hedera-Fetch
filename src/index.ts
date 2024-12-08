@@ -1,6 +1,13 @@
 const mainetBaseUrl = "https://mainnet.mirrornode.hedera.com/";
-const tetnetBaseUrl = "https://testnet.mirrornode.hedera.com/";
 import { errorLog } from "./utils/error";
+
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//--------------------------------Fetch Data for Polaris Explorer------------------------------------
 
 //Buscar alguna cuenta o cuentas basado en unos x parametros
 export async function fetchAccounts({
@@ -1294,3 +1301,76 @@ export async function fetchNetworkFees(): Promise<any> {
     throw new Error("Error fetching network fees");
   }
 }
+
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//--------------------------------Fetch Data for Polaris NFTs----------------------------------------
+
+//Buscar informacion sobre una coleccion NFT
+export async function fetchNftColection() {}
+
+//Buscar el historial de transacciones de una coleccion NFT
+export async function fetchTransactionHistoryNftColection() {}
+
+//Buscar el topHolders de una coleccion NFT
+export async function fetchTopHoldersNftColection() {}
+
+//Buscar el floor price de una coleccion NFT
+export async function fetchFloorPriceNftColection() {}
+
+//Buscar el volume de una coleccion NFT
+export async function fetchVolumeNftColection() {}
+
+//Buscar la capitalizacion de mercado de una coleccion NFT
+export async function fetchCapMarketNftColection() {}
+
+//Buscar socialMedia data sobre la coleccion NFT
+export async function fetchSocialMediaNftColection() {}
+
+//Buscar la complet trading Data de una coleccion NFT
+export async function fetchTradingDataNftColection() {}
+
+//Buscar la informacion sobre un NFT especifico
+export async function fetchNft() {}
+
+//Buscar el historial de transacciones de un NFT especifico
+export async function fetchTransactionHistoryNft() {}
+
+//Buscar el floor price de un NFT especifico
+export async function fetchFloorPriceNft() {}
+
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//--------------------------------Fetch Data for Polaris Trading-------------------------------------
+
+//Buscar informacion sobre una moneda especifica
+export async function fetchCoin() {}
+
+//Buscar informacion sobre el historial de transacciones de una moneda especifica
+export async function fetchTransactionHistoryCoin() {}
+
+//Buscar informacion sobre el top holders de una moneda especifica
+export async function fetchTopHolderCoin() {}
+
+//Buscar el floor price de una moneda especifica
+export async function fetchFloorPriceCoin() {}
+
+//Buscar el volume de una moneda especifica
+export async function fetchVolumeCoin() {}
+
+//Buscar la capitalizacion de mercado de una moneda especifica
+export async function fetchCapMarketCoin() {}
+
+//Buscar socialMedia info sobre una moneda especifica
+export async function fetchSocialMediaCoin() {}
+
+//Buscar complet trading data sobre una moneda especifica
+export async function fetchTradingDataCoin() {}

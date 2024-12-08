@@ -8,26 +8,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const mainetBaseUrl = "https://mainnet.mirrornode.hedera.com/";
-//Acounts
+import { errorLog } from "./utils/error";
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//--------------------------------Fetch Data for Polaris Explorer------------------------------------
+//Buscar alguna cuenta o cuentas basado en unos x parametros
 export function fetchAccounts(_a) {
     return __awaiter(this, arguments, void 0, function* ({ lt, lte, gt, gte, order, account, transactionType, }) {
         try {
             const params = {};
             // Validar filtros generales
             if (lt && lt !== "gt" && lt !== "gte" && lt !== "lt" && lt !== "lte") {
-                throw new Error("Invalid value for 'lt'. Must be a valid filter.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'lt'. Must be a valid filter.");
+                errorLog(e);
             }
             if (lte && lte !== "gt" && lte !== "gte" && lte !== "lt" && lte !== "lte") {
-                throw new Error("Invalid value for 'lte'. Must be a valid filter.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'lte'. Must be a valid filter.");
+                errorLog(e);
             }
             if (gt && gt !== "gt" && gt !== "gte" && gt !== "lt" && gt !== "lte") {
-                throw new Error("Invalid value for 'gt'. Must be a valid filter.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'gt'. Must be a valid filter.");
+                errorLog(e);
             }
             if (gte && gte !== "gt" && gte !== "gte" && gte !== "lt" && gte !== "lte") {
-                throw new Error("Invalid value for 'gte'. Must be a valid filter.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'gte'. Must be a valid filter.");
+                errorLog(e);
             }
             if (order && !["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             // Agregar filtros generales
             if (lt)
@@ -44,22 +57,26 @@ export function fetchAccounts(_a) {
             if (account) {
                 if (account.id) {
                     if (typeof account.id !== "string" || !/^0\.0\.\d+$/.test(account.id)) {
-                        throw new Error("Invalid format for 'account.id'. Must be in the format '0.0.<number>'.");
+                        let e = new Error("Hedera Fetch Error | -> Invalid format for 'account.id'. Must be in the format '0.0.<number>'.");
+                        errorLog(e);
                     }
                     params[`account.id`] = account.id;
                 }
                 if (account.balance) {
                     if (!["gt", "gte", "lt", "lte"].includes(account.balance.op)) {
-                        throw new Error("Invalid operator for 'account.balance'. Must be 'gt', 'gte', 'lt', or 'lte'.");
+                        let e = new Error("Hedera Fetch Error | -> Invalid operator for 'account.balance'. Must be 'gt', 'gte', 'lt', or 'lte'.");
+                        errorLog(e);
                     }
                     if (typeof account.balance.value !== "string") {
-                        throw new Error("Invalid value for 'account.balance'. Must be a string.");
+                        let e = new Error("Hedera Fetch Error | -> Invalid value for 'account.balance'. Must be a string.");
+                        errorLog(e);
                     }
                     params[`account.balance`] = `${account.balance.op}:${account.balance.value}`;
                 }
                 if (account.publickey) {
                     if (typeof account.publickey !== "string") {
-                        throw new Error("Invalid format for 'account.publickey'. Must be a string.");
+                        let e = new Error("Hedera Fetch Error | -> Invalid format for 'account.publickey'. Must be a string.");
+                        errorLog(e);
                     }
                     params[`account.publickey`] = account.publickey;
                 }
@@ -67,7 +84,8 @@ export function fetchAccounts(_a) {
             // Validar parámetro transactionType
             if (transactionType) {
                 if (!account || !account.id) {
-                    throw new Error("Account ID is required for 'transactionType'.");
+                    let e = new Error("Hedera Fetch Error | -> Account ID is required for 'transactionType'.");
+                    errorLog(e);
                 }
                 return fetch(`${mainetBaseUrl}api/v1/accounts/${account.id}?transactionType=${transactionType}`, {
                     method: "GET",
@@ -79,7 +97,11 @@ export function fetchAccounts(_a) {
             // Crear la URL con los parámetros de consulta solo si existen
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/accounts${queryString ? `?${queryString}` : ""}`;
-            console.info("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.info("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -87,23 +109,26 @@ export function fetchAccounts(_a) {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
         }
         catch (error) {
             console.error(error);
-            throw new Error("Error fetching accounts: " + error);
+            throw new Error("Hedera Fetch Error | -> Error fetching accounts: " + error);
         }
     });
 }
+//Buscar informacion basica de una cuenta
 export function fetchAccount(account) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Si la cuenta no existe, se lanza una excepción
             if (!account) {
-                throw new Error("Account is required");
+                let e = new Error("Hedera Fetch Error | -> Account is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/accounts/${account}`);
             const data = yield response.json();
@@ -115,12 +140,14 @@ export function fetchAccount(account) {
         }
     });
 }
+//Buscar todos los tokens asociados a una cuenta
 export function fetchAccountTokensAsociated(account) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Si la cuenta no existe, se lanza una excepción
             if (!account) {
-                throw new Error("Account is required");
+                let e = new Error("Hedera Fetch Error | -> Account is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/accounts/${account}/tokens`);
             const data = yield response.json();
@@ -132,43 +159,53 @@ export function fetchAccountTokensAsociated(account) {
         }
     });
 }
+//Buscar los nfts que tenga una cuenta, (opcional pasarle parametros para filtrar estos NFTs)
 export function fetchAccountNFTs(account_1, _a) {
     return __awaiter(this, arguments, void 0, function* (account, { tokenId, tokenIdOperator, serialNumber, serialNumberOperator, spenderId, spenderIdOperator, order = "desc", }) {
         try {
             // Validar cuenta
             if (!account) {
-                throw new Error("Account is required.");
+                let e = new Error("Hedera Fetch Error | -> Account is required.");
+                errorLog(e);
             }
             // Validar y construir los parámetros de consulta
             const params = {};
             if (tokenId) {
                 if (!["eq", "ne", "lt", "lte", "gt", "gte"].includes(tokenIdOperator || "eq")) {
-                    throw new Error("Invalid operator for 'tokenId'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'tokenId'.");
+                    errorLog(e);
                 }
                 params[`token.id${tokenIdOperator ? `=${tokenIdOperator}` : ""}`] =
                     tokenId;
             }
             if (serialNumber) {
                 if (!["eq", "lt", "lte", "gt", "gte"].includes(serialNumberOperator || "eq")) {
-                    throw new Error("Invalid operator for 'serialNumber'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'serialNumber'.");
+                    errorLog(e);
                 }
                 params[`serialnumber${serialNumberOperator ? `=${serialNumberOperator}` : ""}`] = serialNumber;
             }
             if (spenderId) {
                 if (!["eq", "lt", "gt"].includes(spenderIdOperator || "eq")) {
-                    throw new Error("Invalid operator for 'spenderId'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'spenderId'.");
+                    errorLog(e);
                 }
                 params[`spender.id${spenderIdOperator ? `=${spenderIdOperator}` : ""}`] =
                     spenderId;
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/accounts/${account}/nfts${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -176,7 +213,8 @@ export function fetchAccountNFTs(account_1, _a) {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -187,12 +225,14 @@ export function fetchAccountNFTs(account_1, _a) {
         }
     });
 }
+//Buscar las recompensas que ha obtenido una cuenta
 export function fetchAccountRewards(account) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Si la cuenta no existe, se lanza una excepción
             if (!account) {
-                throw new Error("Account is required");
+                let e = new Error("Hedera Fetch Error | -> Account is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/accounts/${account}/rewards`);
             const data = yield response.json();
@@ -204,7 +244,7 @@ export function fetchAccountRewards(account) {
         }
     });
 }
-//Balances
+//Buscar los balances en (tokens) de una cuenta y opcional filtrar los resultados
 export function fetchBalances() {
     return __awaiter(this, arguments, void 0, function* ({ accountId, accountIdOperator, balance, balanceOperator, timestamp, publicKey, order = "desc", } = {}) {
         try {
@@ -212,38 +252,46 @@ export function fetchBalances() {
             const params = {};
             if (accountId) {
                 if (!["eq", "lt", "lte", "gt", "gte"].includes(accountIdOperator || "eq")) {
-                    throw new Error("Invalid operator for 'accountId'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'accountId'.");
+                    errorLog(e);
                 }
                 params[`account.id${accountIdOperator ? `=${accountIdOperator}` : ""}`] =
                     accountId;
             }
             if (balance) {
                 if (!["eq", "lt", "lte", "gt", "gte"].includes(balanceOperator || "eq")) {
-                    throw new Error("Invalid operator for 'balance'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'balance'.");
+                    errorLog(e);
                 }
                 params[`account.balance${balanceOperator ? `=${balanceOperator}` : ""}`] =
                     balance;
             }
             if (timestamp) {
                 if (!/^\d+\.\d{9}$/.test(timestamp)) {
-                    throw new Error("Invalid format for 'timestamp'. Must be in seconds.nanoseconds format.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'timestamp'. Must be in seconds.nanoseconds format.");
                 }
                 params.timestamp = timestamp;
             }
             if (publicKey) {
                 if (typeof publicKey !== "string") {
-                    throw new Error("Invalid format for 'publicKey'. Must be a string.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'publicKey'. Must be a string.");
+                    errorLog(e);
                 }
                 params["account.publickey"] = publicKey;
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/balances${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -251,7 +299,8 @@ export function fetchBalances() {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -262,7 +311,7 @@ export function fetchBalances() {
         }
     });
 }
-// Transactions
+//Buscar un grupo de transacciones o una transaccion con opcion de filtrado
 export function fetchTransactions() {
     return __awaiter(this, arguments, void 0, function* ({ accountId, accountIdOperator, timestamp, result, transactionType, order = "desc", } = {}) {
         try {
@@ -270,20 +319,23 @@ export function fetchTransactions() {
             const params = {};
             if (accountId) {
                 if (!["eq", "lt", "lte", "gt", "gte"].includes(accountIdOperator || "eq")) {
-                    throw new Error("Invalid operator for 'accountId'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'accountId'.");
+                    errorLog(e);
                 }
                 params[`account.id${accountIdOperator ? `=${accountIdOperator}` : ""}`] =
                     accountId;
             }
             if (timestamp) {
                 if (!/^\d+\.\d{9}$/.test(timestamp)) {
-                    throw new Error("Invalid format for 'timestamp'. Must be in seconds.nanoseconds format.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'timestamp'. Must be in seconds.nanoseconds format.");
+                    errorLog(e);
                 }
                 params.timestamp = timestamp;
             }
             if (result) {
                 if (!["success", "fail"].includes(result)) {
-                    throw new Error("Invalid value for 'result'. Must be 'success' or 'fail'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid value for 'result'. Must be 'success' or 'fail'.");
+                    errorLog(e);
                 }
                 params.result = result;
             }
@@ -291,13 +343,18 @@ export function fetchTransactions() {
                 params.transactionType = transactionType;
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/transactions${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -305,7 +362,8 @@ export function fetchTransactions() {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -316,15 +374,18 @@ export function fetchTransactions() {
         }
     });
 }
+//Buscar las transacciones que ha realizado una cuenta con opcion de filtrado
 export function fetchTransactionsAccount(account_1) {
     return __awaiter(this, arguments, void 0, function* (account, filters = {}) {
         try {
             // Validar la cuenta
             if (!account) {
-                throw new Error("Account is required");
+                let e = new Error("Hedera Fetch Error | -> Account is required");
+                errorLog(e);
             }
             if (!account.startsWith("0.0")) {
-                throw new Error("Account must start with 0.0");
+                let e = new Error("Hedera Fetch Error | -> Account must start with 0.0");
+                errorLog(e);
             }
             // Llamar a fetchTransactions con el accountId y filtros
             return yield fetchTransactions(Object.assign({ accountId: account, accountIdOperator: "eq" }, filters));
@@ -335,18 +396,25 @@ export function fetchTransactionsAccount(account_1) {
         }
     });
 }
-//Topics
+//Buscar informacion de un topic en especifico
 export function fetchTopicMessages(topicId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Validar topicId
             if (!topicId) {
-                throw new Error("Topic id is required.");
+                let e = new Error("Hedera Fetch Error | -> Topic id is required.");
+                errorLog(e);
             }
             // Verificar el formato del topicId
             if (!/^0\.0\.\d+$/.test(topicId)) {
-                throw new Error("Invalid format for 'topicId'. Must be in the format '0.0.<number>'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid format for 'topicId'. Must be in the format '0.0.<number>'.");
+                errorLog(e);
             }
+            console.log(" ");
+            console.log(" ");
+            console.log(`Hedera Fetch Info | -> Fetch URL: ${mainetBaseUrl}api/v1/topics/${topicId}/messages`);
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(`${mainetBaseUrl}api/v1/topics/${topicId}/messages`);
             const data = yield response.json();
             return data;
@@ -357,20 +425,24 @@ export function fetchTopicMessages(topicId) {
         }
     });
 }
+//Buscar el mensage de un topic por la sequencia de numeros
 export function fetchTopicMessageBySequenceNumber(topicId, sequenceNumber) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Validar topicId
             if (!topicId) {
-                throw new Error("Topic id is required.");
+                let e = new Error("Hedera Fetch Error | -> Topic id is required.");
+                errorLog(e);
             }
             // Verificar el formato del topicId
             if (!/^0\.0\.\d+$/.test(topicId)) {
-                throw new Error("Invalid format for 'topicId'. Must be in the format '0.0.<number>'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid format for 'topicId'. Must be in the format '0.0.<number>'.");
+                errorLog(e);
             }
             // Validar sequenceNumber
             if (sequenceNumber <= 0) {
-                throw new Error("Sequence number must be a positive integer.");
+                let e = new Error("Hedera Fetch Error | -> Sequence number must be a positive integer.");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/topics/${topicId}/messages/${sequenceNumber}`);
             const data = yield response.json();
@@ -382,16 +454,19 @@ export function fetchTopicMessageBySequenceNumber(topicId, sequenceNumber) {
         }
     });
 }
+//Buscar un mensage de un topic por su timestamp
 export function fetchTopicMessageByTimestamp(timestamp) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Validar timestamp
             if (!timestamp) {
-                throw new Error("Consensus timestamp is required.");
+                let e = new Error("Hedera Fetch Error | -> Consensus timestamp is required.");
+                errorLog(e);
             }
             // Verificar formato del timestamp (seconds.nanoseconds)
             if (!/^\d+\.\d{9}$/.test(timestamp)) {
-                throw new Error("Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'.");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/topics/messages/${timestamp}`);
             const data = yield response.json();
@@ -403,7 +478,7 @@ export function fetchTopicMessageByTimestamp(timestamp) {
         }
     });
 }
-// Tokens
+//Buscar un grupo de tokens o un token en especifico con posibilidad de filtrado
 export function fetchTokens() {
     return __awaiter(this, arguments, void 0, function* ({ publicKey, accountId, tokenId, tokenIdOperator, order = "desc", limit, } = {}) {
         try {
@@ -414,31 +489,39 @@ export function fetchTokens() {
             }
             if (accountId) {
                 if (!/^0\.0\.\d+$/.test(accountId)) {
-                    throw new Error("Invalid format for 'accountId'. Must be in the format '0.0.<number>'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'accountId'. Must be in the format '0.0.<number>'.");
+                    errorLog(e);
                 }
                 params["account.id"] = accountId;
             }
             if (tokenId) {
                 if (!["eq", "lt", "lte", "gt", "gte"].includes(tokenIdOperator || "eq")) {
-                    throw new Error("Invalid operator for 'tokenId'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'tokenId'.");
+                    errorLog(e);
                 }
                 params[`token.id${tokenIdOperator ? `=${tokenIdOperator}` : ""}`] =
                     tokenId;
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             if (limit) {
                 if (limit <= 0) {
-                    throw new Error("Limit must be a positive number.");
+                    let e = new Error("Hedera Fetch Error | -> Limit must be a positive number.");
+                    errorLog(e);
                 }
                 params.limit = limit.toString();
             }
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/tokens${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -446,7 +529,8 @@ export function fetchTokens() {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -457,11 +541,13 @@ export function fetchTokens() {
         }
     });
 }
+//Buscar informacion de un token en especifico
 export function fetchToken(tokenId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!tokenId) {
-                throw new Error("Token id is required");
+                let e = new Error("Hedera Fetch Error | -> Token id is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/tokens/${tokenId}`);
             const data = yield response.json();
@@ -473,42 +559,52 @@ export function fetchToken(tokenId) {
         }
     });
 }
+//Buscar los balances de un token especifico que pueda tener una wallet con opcion de filtrado
 export function fetchTokenBalances(tokenId_1) {
     return __awaiter(this, arguments, void 0, function* (tokenId, { accountId, accountIdOperator, accountBalance, accountBalanceOperator, timestamp, order = "desc", } = {}) {
         try {
             // Validar tokenId
             if (!tokenId) {
-                throw new Error("Token id is required.");
+                let e = new Error("Hedera Fetch Error | -> Token id is required.");
+                errorLog(e);
             }
             // Validar y construir los parámetros de consulta
             const params = {};
             if (accountId) {
                 if (!/^0\.0\.\d+$/.test(accountId)) {
-                    throw new Error("Invalid format for 'accountId'. Must be in the format '0.0.<number>'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'accountId'. Must be in the format '0.0.<number>'.");
+                    errorLog(e);
                 }
                 params[`account.id${accountIdOperator ? `=${accountIdOperator}` : ""}`] =
                     accountId;
             }
             if (accountBalance) {
                 if (!["eq", "lt", "lte", "gt", "gte"].includes(accountBalanceOperator || "eq")) {
-                    throw new Error("Invalid operator for 'accountBalance'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid operator for 'accountBalance'.");
+                    errorLog(e);
                 }
                 params[`account.balance${accountBalanceOperator ? `=${accountBalanceOperator}` : ""}`] = accountBalance;
             }
             if (timestamp) {
                 if (!/^\d+\.\d{9}$/.test(timestamp)) {
-                    throw new Error("Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'.");
+                    errorLog(e);
                 }
                 params.timestamp = timestamp;
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/tokens/${tokenId}/balances${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -516,7 +612,8 @@ export function fetchTokenBalances(tokenId_1) {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -527,24 +624,28 @@ export function fetchTokenBalances(tokenId_1) {
         }
     });
 }
+//Buscar los NFTs que pueda tener una x Wallet con opcion de filtrado
 export function fetchTokenNfts(tokenId_1) {
     return __awaiter(this, arguments, void 0, function* (tokenId, { accountId, limit, order = "desc", serialNumber, } = {}) {
         try {
             // Validar tokenId
             if (!tokenId) {
-                throw new Error("Token id is required.");
+                let e = new Error("Hedera Fetch Error | -> Token id is required.");
+                errorLog(e);
             }
             // Validar y construir los parámetros de consulta
             const params = {};
             if (accountId) {
                 if (!/^0\.0\.\d+$/.test(accountId)) {
-                    throw new Error("Invalid format for 'accountId'. Must be in the format '0.0.<number>'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'accountId'. Must be in the format '0.0.<number>'.");
+                    errorLog(e);
                 }
                 params["account.id"] = accountId;
             }
             if (limit) {
                 if (limit <= 0) {
-                    throw new Error("Limit must be a positive number.");
+                    let e = new Error("Hedera Fetch Error | -> Limit must be a positive number.");
+                    errorLog(e);
                 }
                 params.limit = limit.toString();
             }
@@ -552,13 +653,18 @@ export function fetchTokenNfts(tokenId_1) {
                 params.serialnumber = serialNumber;
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/tokens/${tokenId}/nfts${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -566,7 +672,8 @@ export function fetchTokenNfts(tokenId_1) {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -577,14 +684,17 @@ export function fetchTokenNfts(tokenId_1) {
         }
     });
 }
+//Buscar un NFT en especifico por su numero serial
 export function fetchTokenNftSerialNumber(tokenId, serialNumber) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!tokenId) {
-                throw new Error("Token id is required");
+                let e = new Error("Hedera Fetch Error | -> Token id is required");
+                errorLog(e);
             }
             if (!serialNumber) {
-                throw new Error("Serial number is required");
+                let e = new Error("Hedera Fetch Error | -> Serial number is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/tokens/${tokenId}/nfts/${serialNumber}`);
             const data = yield response.json();
@@ -596,41 +706,52 @@ export function fetchTokenNftSerialNumber(tokenId, serialNumber) {
         }
     });
 }
+//Buscar el historial de transacciones de un NFT especifico
 export function fetchNftTransactionHistory(tokenID_1, serialNumber_1) {
     return __awaiter(this, arguments, void 0, function* (tokenID, serialNumber, { limit, order = "desc", timestamp, } = {}) {
         try {
             // Validar tokenID y serialNumber
             if (!tokenID) {
-                throw new Error("Nft id is required.");
+                let e = new Error("Hedera Fetch Error | -> Nft id is required.");
+                errorLog(e);
             }
             if (!/^0\.0\.\d+$/.test(tokenID)) {
-                throw new Error("Invalid format for 'tokenID'. Must be in the format '0.0.<number>'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid format for 'tokenID'. Must be in the format '0.0.<number>'.");
+                errorLog(e);
             }
             if (!serialNumber) {
-                throw new Error("Serial number is required.");
+                let e = new Error("Hedera Fetch Error | -> Serial number is required.");
+                errorLog(e);
             }
             // Validar y construir los parámetros de consulta
             const params = {};
             if (limit) {
                 if (limit <= 0) {
-                    throw new Error("Limit must be a positive number.");
+                    let e = new Error("Hedera Fetch Error | -> Limit must be a positive number.");
+                    errorLog(e);
                 }
                 params.limit = limit.toString();
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             if (timestamp) {
                 if (!/^\d+\.\d{9}$/.test(timestamp)) {
-                    throw new Error("Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'timestamp'. Must be in the format 'seconds.nanoseconds'.");
+                    errorLog(e);
                 }
                 params.timestamp = timestamp;
             }
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/tokens/${tokenID}/nfts/${serialNumber}/transactions${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -638,7 +759,8 @@ export function fetchNftTransactionHistory(tokenID_1, serialNumber_1) {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -649,7 +771,7 @@ export function fetchNftTransactionHistory(tokenID_1, serialNumber_1) {
         }
     });
 }
-// Contracts
+//Buscar un x numero de contratos o unos en especifico con opcion de filtrado
 export function fetchContracts() {
     return __awaiter(this, arguments, void 0, function* ({ contractId, limit, order = "desc", } = {}) {
         try {
@@ -657,24 +779,31 @@ export function fetchContracts() {
             const params = {};
             if (contractId) {
                 if (!/^0\.0\.\d+$/.test(contractId)) {
-                    throw new Error("Invalid format for 'contractId'. Must be in the format '0.0.<number>'.");
+                    let e = new Error("Hedera Fetch Error | -> Invalid format for 'contractId'. Must be in the format '0.0.<number>'.");
+                    errorLog(e);
                 }
                 params["contract.id"] = contractId;
             }
             if (limit) {
                 if (limit <= 0) {
-                    throw new Error("Limit must be a positive number.");
+                    let e = new Error("Hedera Fetch Error | -> Limit must be a positive number.");
+                    errorLog(e);
                 }
                 params.limit = limit.toString();
             }
             if (!["asc", "desc"].includes(order)) {
-                throw new Error("Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                let e = new Error("Hedera Fetch Error | -> Invalid value for 'order'. Must be 'asc' or 'desc'.");
+                errorLog(e);
             }
             params.order = order;
             // Construir la URL con los parámetros de consulta
             const queryString = new URLSearchParams(params).toString();
             const url = `${mainetBaseUrl}api/v1/contracts${queryString ? `?${queryString}` : ""}`;
-            console.log("Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
+            console.log("Hedera Fetch Info | -> Request URL:", url); // Verifica la URL generada
+            console.log(" ");
+            console.log(" ");
             const response = yield fetch(url, {
                 method: "GET",
                 headers: {
@@ -682,7 +811,8 @@ export function fetchContracts() {
                 },
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                let e = new Error(`Hedera Fetch Error | -> HTTP error! Status: ${response.status}`);
+                errorLog(e);
             }
             const data = yield response.json();
             return data;
@@ -693,11 +823,13 @@ export function fetchContracts() {
         }
     });
 }
+//Buscar informacion de un contrato especifico
 export function fetchContract(contract) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!contract) {
-                throw new Error("Contract is required");
+                let e = new Error("Hedera Fetch Error | -> Contract is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/contracts/${contract}`);
             return yield response.json();
@@ -708,11 +840,13 @@ export function fetchContract(contract) {
         }
     });
 }
+//Buscar los logs de un contrato especifico
 export function fetchContractLogs(contract) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!contract) {
-                throw new Error("Contract is required");
+                let e = new Error("Hedera Fetch Error | -> Contract is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/contracts/${contract}/results/logs`);
             return yield response.json();
@@ -723,7 +857,7 @@ export function fetchContractLogs(contract) {
         }
     });
 }
-// Blocks
+//Buscar informacion de los ultimos bloques
 export function fetchBlocks() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -736,11 +870,13 @@ export function fetchBlocks() {
         }
     });
 }
+//Buscar informacion de un bloquee especifico
 export function fetchBlock(block) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!block) {
-                throw new Error("Block is required");
+                let e = new Error("Hedera Fetch Error | -> Block is required");
+                errorLog(e);
             }
             const response = yield fetch(`${mainetBaseUrl}api/v1/blocks/${block}`);
             return yield response.json();
@@ -751,7 +887,7 @@ export function fetchBlock(block) {
         }
     });
 }
-// Nodes
+//Buscar informacion sobre los ultimos nodos
 export function fetchNodes() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -764,7 +900,7 @@ export function fetchNodes() {
         }
     });
 }
-// Network
+//Buscar informacion del supply actual en la red (hbar)
 export function fetchNetworkSupply() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -777,6 +913,7 @@ export function fetchNetworkSupply() {
         }
     });
 }
+//Buscar informacion de los fees actuales en la red
 export function fetchNetworkFees() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -788,5 +925,95 @@ export function fetchNetworkFees() {
             throw new Error("Error fetching network fees");
         }
     });
+}
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//--------------------------------Fetch Data for Polaris NFTs----------------------------------------
+//Buscar informacion sobre una coleccion NFT
+export function fetchNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el historial de transacciones de una coleccion NFT
+export function fetchTransactionHistoryNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el topHolders de una coleccion NFT
+export function fetchTopHoldersNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el floor price de una coleccion NFT
+export function fetchFloorPriceNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el volume de una coleccion NFT
+export function fetchVolumeNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar la capitalizacion de mercado de una coleccion NFT
+export function fetchCapMarketNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar socialMedia data sobre la coleccion NFT
+export function fetchSocialMediaNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar la complet trading Data de una coleccion NFT
+export function fetchTradingDataNftColection() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar la informacion sobre un NFT especifico
+export function fetchNft() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el historial de transacciones de un NFT especifico
+export function fetchTransactionHistoryNft() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el floor price de un NFT especifico
+export function fetchFloorPriceNft() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+//--------------------------------Fetch Data for Polaris Trading-------------------------------------
+//Buscar informacion sobre una moneda especifica
+export function fetchCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar informacion sobre el historial de transacciones de una moneda especifica
+export function fetchTransactionHistoryCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar informacion sobre el top holders de una moneda especifica
+export function fetchTopHolderCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el floor price de una moneda especifica
+export function fetchFloorPriceCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar el volume de una moneda especifica
+export function fetchVolumeCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar la capitalizacion de mercado de una moneda especifica
+export function fetchCapMarketCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar socialMedia info sobre una moneda especifica
+export function fetchSocialMediaCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+//Buscar complet trading data sobre una moneda especifica
+export function fetchTradingDataCoin() {
+    return __awaiter(this, void 0, void 0, function* () { });
 }
 //# sourceMappingURL=index.js.map
