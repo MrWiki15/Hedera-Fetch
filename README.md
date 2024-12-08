@@ -12,7 +12,7 @@ npm install hedera-fetch
 
 To start using the library, import the functions you need:
 
-````import {
+`import {
   fetchAccounts,
   fetchAccount,
   fetchAccountTokensAsociated,
@@ -20,7 +20,7 @@ To start using the library, import the functions you need:
   fetchBalances,
   fetchTransactions,
   fetchToken
-} from 'hedera-fetch';```
+} from 'hedera-fetch';`
 
 ## Functions
 
@@ -31,6 +31,7 @@ To start using the library, import the functions you need:
 This function retrieves a list of accounts using various filters.
 
 **Parameters:**
+
 - lt, lte, gt, gte (optional): Filters for the account ID.
 - order (optional): Can be "asc" or "desc" to sort the response.
 - account (optional): Object containing:
@@ -41,19 +42,20 @@ This function retrieves a list of accounts using various filters.
 
 **Usage:**
 
-```const accounts = await fetchAccounts({
+`const accounts = await fetchAccounts({
   gt: "0.0.1000",
   order: "desc",
   account: {
     balance: { op: "gte", value: "1000000" },
   }
-});```
+});`
 
 #### fetchAccount(accountId)
 
 Retrieves the details of a specific account.
 
 **Parameters:**
+
 - accountId: The account ID in the format 0.0.<number>.
 
 **Usage:**
@@ -67,6 +69,7 @@ const accountData = await fetchAccount("0.0.12345");
 Retrieves a list of tokens using filters.
 
 **Parameters:**
+
 - publicKey (optional): Public key associated with the token.
 - accountId (optional): Account ID associated with the token in the format 0.0.<number>.
 - tokenId (optional): Token ID.
@@ -76,11 +79,11 @@ Retrieves a list of tokens using filters.
 
 **Usage:**
 
-```const tokens = await fetchTokens({
+`const tokens = await fetchTokens({
   accountId: "0.0.12345",
   order: "asc",
   limit: 10
-});```
+});`
 
 ### 3. Transactions
 
@@ -89,6 +92,7 @@ Retrieves a list of tokens using filters.
 Retrieves a list of transactions filtered by different parameters.
 
 **Parameters:**
+
 - accountId (optional): Account ID associated with the transaction.
 - accountIdOperator (optional): Operator for the account ID (eq, lt, gt, etc.).
 - timestamp (optional): Timestamp in the format seconds.nanoseconds.
@@ -98,26 +102,27 @@ Retrieves a list of transactions filtered by different parameters.
 
 **Usage:**
 
-```const transactions = await fetchTransactions({
+`const transactions = await fetchTransactions({
   accountId: "0.0.12345",
   result: "success",
   order: "desc"
-});```
+});`
 
 #### fetchTransactionsAccount(account, filters)
 
 Retrieves all transactions associated with a specific account.
 
 **Parameters:**
+
 - account: The account ID in the format 0.0.<number>.
 - filters (optional): Additional filters like timestamp, result, transactionType, and order.
 
 **Usage:**
 
-```const accountTransactions = await fetchTransactionsAccount("0.0.12345", {
+`const accountTransactions = await fetchTransactionsAccount("0.0.12345", {
   result: "success",
   order: "asc"
-});```
+});`
 
 ### 4. Contracts
 
@@ -126,27 +131,29 @@ Retrieves all transactions associated with a specific account.
 Retrieves a list of contracts.
 
 **Parameters:**
+
 - contractId (optional): Contract ID in the format 0.0.<number>.
 - limit (optional): Limits the number of results.
 - order (optional): Sorting order of the results (asc or desc).
 
 **Usage:**
 
-```const contracts = await fetchContracts({
+`const contracts = await fetchContracts({
   limit: 5,
   order: "asc"
-});```
+});`
 
 #### fetchContract(contractId)
 
 Retrieves the details of a specific contract.
 
 **Parameters:**
+
 - contractId: Contract ID in the format 0.0.<number>.
 
 **Usage:**
 
-```const contractData = await fetchContract("0.0.54321");```
+`const contractData = await fetchContract("0.0.54321");`
 
 ### 5. Blocks
 
@@ -156,18 +163,19 @@ Retrieves a list of blocks.
 
 **Usage:**
 
-```const blocks = await fetchBlocks();```
+`const blocks = await fetchBlocks();`
 
 #### fetchBlock(blockId)
 
 Retrieves the details of a specific block.
 
 **Parameters:**
+
 - blockId: The ID of the block to retrieve.
 
 **Usage:**
 
-```const blockData = await fetchBlock("1");```
+`const blockData = await fetchBlock("1");`
 
 ### 6. Network
 
@@ -177,7 +185,7 @@ Retrieves the total network supply for Hedera.
 
 **Usage:**
 
-```const supply = await fetchNetworkSupply();```
+`const supply = await fetchNetworkSupply();`
 
 #### fetchNetworkFees()
 
@@ -185,6 +193,8 @@ Retrieves the current network fees for Hedera.
 
 **Usage:**
 
-```const fees = await fetchNetworkFees();```
+`const fees = await fetchNetworkFees();`
 
-````
+```
+
+```
