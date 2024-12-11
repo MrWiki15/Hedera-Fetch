@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Hedera Fetch Library
 
 `hedera-fetch` is a library designed to retrieve information from the Hedera blockchain network. It provides flexible methods to query accounts, tokens, NFTs, contracts, transactions, and other network-related data. The library supports a variety of filters to help refine the results.
@@ -117,3 +118,8 @@ const supply = await fetchNetworkSupply();
 const fees = await fetchNetworkFees();
 console.log({ supply, fees });
 })();
+=======
+# (IN ALPHA)
+
+The best library to search for hedera information in an easy, fast and convenient way.
+>>>>>>> 588fa7e6fcd099883edd0db1b2fe492bfdcc8e98
