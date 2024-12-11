@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "test"
+    "test": "node ./dist/index.js"
   },
   "keywords": [
     "hedera",

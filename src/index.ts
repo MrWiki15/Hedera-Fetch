@@ -1,5 +1,47 @@
 const mainetBaseUrl = "https://mainnet.mirrornode.hedera.com/";
-import { errorLog } from "./utils/error";
+
+function errorLog(erros: Error) {
+  try {
+    console.log(" ");
+    console.log(" ");
+    console.info(
+      "-------------------------Error details-------------------------"
+    );
+    console.log("Name: ", erros.name);
+    console.log("Message: ", erros.message);
+    console.log(" ");
+    console.log(" ");
+    console.log("Error Stack--------------------------");
+    console.log(erros.stack);
+    console.info(
+      "---------------------------------------------------------------"
+    );
+    console.log(" ");
+    console.log(" ");
+
+    throw erros;
+  } catch (e) {
+    console.log("Ocurrio un error al mostrar el error en consola");
+    console.log(e);
+  }
+}
+
+// Función para reemplazar recursivamente 'ar://' e 'ipfs://' por sus equivalentes HTTPS
+function replaceUrls(obj: any): any {
+  if (typeof obj === "string") {
+    if (obj.startsWith("ar://")) {
+      return obj.replace("ar://", "https://arweave.net/");
+    }
+    if (obj.startsWith("ipfs://")) {
+      return obj.replace("ipfs://", "https://ipfs.io/ipfs/");
+    }
+  } else if (typeof obj === "object" && obj !== null) {
+    for (const key in obj) {
+      obj[key] = replaceUrls(obj[key]);
+    }
+  }
+  return obj;
+}
 
 //---------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------
@@ -121,7 +163,7 @@ export async function fetchAccounts({
         errorLog(e);
       }
       return fetch(
-        `${mainetBaseUrl}api/v1/accounts/${account.id}?transactionType=${transactionType}`,
+        `${mainetBaseUrl}api/v1/accounts/${account?.id}?transactionType=${transactionType}`,
         {
           method: "GET",
           headers: {
@@ -786,20 +828,88 @@ export async function fetchTokens({
   }
 }
 
-//Buscar informacion de un token en especifico
+// Función para buscar información sobre un token especifico
 export async function fetchToken(tokenId: string): Promise<any> {
   try {
+    // Validar el tokenId
     if (!tokenId) {
-      let e = new Error("Hedera Fetch Error | -> Token id is required");
+      let e = new Error("Hedera Fetch Error | -> Token ID is required.");
       errorLog(e);
     }
 
-    const response = await fetch(`${mainetBaseUrl}api/v1/tokens/${tokenId}`);
+    // Verificar el formato del tokenId
+    if (!/^0\.0\.\d+$/.test(tokenId)) {
+      let e = new Error(
+        "Hedera Fetch Error | -> Invalid format for 'tokenId'. Must be in the format '0.0.<number>'."
+      );
+      errorLog(e);
+    }
+
+    // Endpoint para obtener información del token (colección NFT)
+    const url = `${mainetBaseUrl}api/v1/tokens/${tokenId}`;
+
+    console.info("Hedera Fetch Info | -> Request URL:", url);
+
+    // Realizar la petición GET
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      let e = new Error(
+        `Hedera Fetch Error | -> HTTP error! Status: ${response.status}`
+      );
+      errorLog(e);
+    }
+
+    // Convertir la respuesta a JSON
     const data = await response.json();
+
+    // Decodificar el campo 'metadata' de Base64 a texto
+    if (data.metadata) {
+      try {
+        const decodedMetadata = Buffer.from(data.metadata, "base64").toString(
+          "utf-8"
+        );
+        data.decodedMetadata = decodedMetadata;
+
+        // Si la metadata contiene una URL con el esquema 'ar://', convertirla a HTTPS
+        if (decodedMetadata.startsWith("ar://")) {
+          const arweaveUrl = decodedMetadata.replace(
+            "ar://",
+            "https://arweave.net/"
+          );
+          console.log("Fetching data from Arweave URL:", arweaveUrl);
+
+          const arweaveResponse = await fetch(arweaveUrl);
+          if (!arweaveResponse.ok) {
+            let e = new Error(
+              `Arweave Fetch Error | -> HTTP error! Status: ${arweaveResponse.status}`
+            );
+            errorLog(e);
+          }
+
+          // Obtener los datos de la URL de Arweave y añadirlos al objeto
+          const arweaveData = await arweaveResponse.json();
+
+          // Reemplazar recursivamente 'ar://' e 'ipfs://' por sus equivalentes HTTPS
+          data.arweaveMetadata = replaceUrls(arweaveData);
+        }
+      } catch (decodeError) {
+        console.error("Error decoding metadata:", decodeError);
+        data.decodedMetadata = null;
+      }
+    } else {
+      data.decodedMetadata = null;
+    }
+
     return data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching token");
+    console.error("Error fetching NFT collection:", error);
+    throw new Error("Error fetching NFT collection: " + error);
   }
 }
 
@@ -1301,76 +1411,3 @@ export async function fetchNetworkFees(): Promise<any> {
     throw new Error("Error fetching network fees");
   }
 }
-
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//--------------------------------Fetch Data for Polaris NFTs----------------------------------------
-
-//Buscar informacion sobre una coleccion NFT
-export async function fetchNftColection() {}
-
-//Buscar el historial de transacciones de una coleccion NFT
-export async function fetchTransactionHistoryNftColection() {}
-
-//Buscar el topHolders de una coleccion NFT
-export async function fetchTopHoldersNftColection() {}
-
-//Buscar el floor price de una coleccion NFT
-export async function fetchFloorPriceNftColection() {}
-
-//Buscar el volume de una coleccion NFT
-export async function fetchVolumeNftColection() {}
-
-//Buscar la capitalizacion de mercado de una coleccion NFT
-export async function fetchCapMarketNftColection() {}
-
-//Buscar socialMedia data sobre la coleccion NFT
-export async function fetchSocialMediaNftColection() {}
-
-//Buscar la complet trading Data de una coleccion NFT
-export async function fetchTradingDataNftColection() {}
-
-//Buscar la informacion sobre un NFT especifico
-export async function fetchNft() {}
-
-//Buscar el historial de transacciones de un NFT especifico
-export async function fetchTransactionHistoryNft() {}
-
-//Buscar el floor price de un NFT especifico
-export async function fetchFloorPriceNft() {}
-
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
-//--------------------------------Fetch Data for Polaris Trading-------------------------------------
-
-//Buscar informacion sobre una moneda especifica
-export async function fetchCoin() {}
-
-//Buscar informacion sobre el historial de transacciones de una moneda especifica
-export async function fetchTransactionHistoryCoin() {}
-
-//Buscar informacion sobre el top holders de una moneda especifica
-export async function fetchTopHolderCoin() {}
-
-//Buscar el floor price de una moneda especifica
-export async function fetchFloorPriceCoin() {}
-
-//Buscar el volume de una moneda especifica
-export async function fetchVolumeCoin() {}
-
-//Buscar la capitalizacion de mercado de una moneda especifica
-export async function fetchCapMarketCoin() {}
-
-//Buscar socialMedia info sobre una moneda especifica
-export async function fetchSocialMediaCoin() {}
-
-//Buscar complet trading data sobre una moneda especifica
-export async function fetchTradingDataCoin() {}

@@ -1,200 +1,119 @@
-# Hedera Fetch
+# Hedera Fetch Library
 
-Hedera Fetch is a library designed to interact with the Hedera Mirror Node API. It provides functions to retrieve data on accounts, transactions, balances, tokens, contracts, blocks, and more.
+`hedera-fetch` is a library designed to retrieve information from the Hedera blockchain network. It provides flexible methods to query accounts, tokens, NFTs, contracts, transactions, and other network-related data. The library supports a variety of filters to help refine the results.
 
-## Installation
+# Features
 
-To install the library, use the following command in your Node.js project:
+- Fetch details about accounts, tokens, NFTs, contracts, and network data.
+- Retrieve specific transactions and apply filters for precise queries.
+- Get metadata and balances for tokens or accounts.
+- Query the current state of the network, including fees and supply.
+
+# Installation
+
+To install the library, use npm:
 
 npm install hedera-fetch
 
-## Configuration
+# Parameters Explained
 
-To start using the library, import the functions you need:
+## General Parameters
 
-`import {
-  fetchAccounts,
-  fetchAccount,
-  fetchAccountTokensAsociated,
-  fetchAccountNFTs,
-  fetchBalances,
-  fetchTransactions,
-  fetchToken
-} from 'hedera-fetch';`
+- **`accountId`**: The Hedera account ID in the format `0.0.xxxxx`.
+- **`tokenId`**: The Hedera token ID in the format `0.0.xxxxx`.
+- **`contractId`**: The Hedera contract ID in the format `0.0.xxxxx`.
+- **`order`**: The order of the results, either `"asc"` (ascending) or `"desc"` (descending).
+- **`limit`**: The maximum number of results to return (must be a positive integer).
+- **`timestamp`**: A timestamp in the `seconds.nanoseconds` format.
 
-## Functions
+## Filtering Parameters
 
-### 1. Accounts
+- **`accountIdOperator` / `tokenIdOperator`**: Operators for filtering (`"eq"`, `"lt"`, `"lte"`, `"gt"`, `"gte"`).
+- **`balanceOperator` / `serialNumberOperator`**: Similar operators used for filtering balances or NFT serial numbers.
 
-#### fetchAccounts(params)
+## NFT-Specific Parameters
 
-This function retrieves a list of accounts using various filters.
+- **`serialNumber`**: The unique serial number of an NFT.
+- **`spenderId`**: The ID of a spender related to an NFT.
 
-**Parameters:**
+## Additional Parameters
 
-- lt, lte, gt, gte (optional): Filters for the account ID.
-- order (optional): Can be "asc" or "desc" to sort the response.
-- account (optional): Object containing:
-  - id: The account ID in the format 0.0.<number>.
-  - balance: Filters on the account balance, with operators like "gt", "lt", "gte", "lte".
-  - publickey: The public key associated with the account.
-- transactionType (optional): Type of transaction to filter.
+- **`publicKey`**: The public key string associated with an account or token.
+- **`result`**: Transaction result (`"success"` or `"fail"`).
+- **`transactionType`**: The type of transaction (e.g., `CRYPTO_TRANSFER`).
 
-**Usage:**
+## Error Handling
 
-`const accounts = await fetchAccounts({
-  gt: "0.0.1000",
-  order: "desc",
-  account: {
-    balance: { op: "gte", value: "1000000" },
-  }
-});`
+All functions log errors using the `errorLog` function, providing detailed information about the issue, such as error name, message, and stack trace. Errors are thrown after logging, allowing users to handle them as needed.
 
-#### fetchAccount(accountId)
+# Usage
 
-Retrieves the details of a specific account.
+Below are examples demonstrating the use of various functions provided by `hedera-fetch`.
 
-**Parameters:**
+## Fetch Account Details
 
-- accountId: The account ID in the format 0.0.<number>.
+Retrieve details of a specific account:
 
-**Usage:**
+import { fetchAccount } from 'hedera-fetch';
 
-const accountData = await fetchAccount("0.0.12345");
+(async () => {
+const accountDetails = await fetchAccount('0.0.xxxxx');
+console.log(accountDetails);
+})();
 
-### 2. Tokens
+## Fetch Tokens Associated with an Account
 
-#### fetchTokens(params)
+import { fetchAccountTokensAsociated } from 'hedera-fetch';
 
-Retrieves a list of tokens using filters.
+(async () => {
+const tokens = await fetchAccountTokensAsociated('0.0.xxxxx');
+console.log(tokens);
+})();
 
-**Parameters:**
+## Fetch NFT Details
 
-- publicKey (optional): Public key associated with the token.
-- accountId (optional): Account ID associated with the token in the format 0.0.<number>.
-- tokenId (optional): Token ID.
-- tokenIdOperator (optional): Operator for the token ID (eq, lt, gt, etc.).
-- order (optional): Sorting order of the results (asc or desc).
-- limit (optional): Limit the number of results.
+Retrieve NFTs owned by an account:
 
-**Usage:**
+import { fetchAccountNFTs } from 'hedera-fetch';
 
-`const tokens = await fetchTokens({
-  accountId: "0.0.12345",
-  order: "asc",
-  limit: 10
-});`
+(async () => {
+const nfts = await fetchAccountNFTs('0.0.xxxxx');
+console.log(nfts);
+})();
 
-### 3. Transactions
+## Fetch Token Information
 
-#### fetchTransactions(params)
+Retrieve metadata and details of a specific token:
 
-Retrieves a list of transactions filtered by different parameters.
+import { fetchToken } from 'hedera-fetch';
 
-**Parameters:**
+(async () => {
+const tokenDetails = await fetchToken('0.0.xxxxx');
+console.log(tokenDetails);
+})();
 
-- accountId (optional): Account ID associated with the transaction.
-- accountIdOperator (optional): Operator for the account ID (eq, lt, gt, etc.).
-- timestamp (optional): Timestamp in the format seconds.nanoseconds.
-- result (optional): Transaction result (success or fail).
-- transactionType (optional): Type of transaction.
-- order (optional): Sorting order of the results (asc or desc).
+## Fetch Transactions
 
-**Usage:**
+Retrieve transactions with filtering options:
 
-`const transactions = await fetchTransactions({
-  accountId: "0.0.12345",
-  result: "success",
-  order: "desc"
-});`
+import { fetchTransactions } from 'hedera-fetch';
 
-#### fetchTransactionsAccount(account, filters)
+(async () => {
+const transactions = await fetchTransactions({
+accountId: '0.0.xxxxx',
+order: 'desc',
+});
+console.log(transactions);
+})();
 
-Retrieves all transactions associated with a specific account.
+## Fetch Network Information
 
-**Parameters:**
+Get details about the current network supply and fees:
 
-- account: The account ID in the format 0.0.<number>.
-- filters (optional): Additional filters like timestamp, result, transactionType, and order.
+import { fetchNetworkSupply, fetchNetworkFees } from 'hedera-fetch';
 
-**Usage:**
-
-`const accountTransactions = await fetchTransactionsAccount("0.0.12345", {
-  result: "success",
-  order: "asc"
-});`
-
-### 4. Contracts
-
-#### fetchContracts(params)
-
-Retrieves a list of contracts.
-
-**Parameters:**
-
-- contractId (optional): Contract ID in the format 0.0.<number>.
-- limit (optional): Limits the number of results.
-- order (optional): Sorting order of the results (asc or desc).
-
-**Usage:**
-
-`const contracts = await fetchContracts({
-  limit: 5,
-  order: "asc"
-});`
-
-#### fetchContract(contractId)
-
-Retrieves the details of a specific contract.
-
-**Parameters:**
-
-- contractId: Contract ID in the format 0.0.<number>.
-
-**Usage:**
-
-`const contractData = await fetchContract("0.0.54321");`
-
-### 5. Blocks
-
-#### fetchBlocks()
-
-Retrieves a list of blocks.
-
-**Usage:**
-
-`const blocks = await fetchBlocks();`
-
-#### fetchBlock(blockId)
-
-Retrieves the details of a specific block.
-
-**Parameters:**
-
-- blockId: The ID of the block to retrieve.
-
-**Usage:**
-
-`const blockData = await fetchBlock("1");`
-
-### 6. Network
-
-#### fetchNetworkSupply()
-
-Retrieves the total network supply for Hedera.
-
-**Usage:**
-
-`const supply = await fetchNetworkSupply();`
-
-#### fetchNetworkFees()
-
-Retrieves the current network fees for Hedera.
-
-**Usage:**
-
-`const fees = await fetchNetworkFees();`
-
-```
-
-```
+(async () => {
+const supply = await fetchNetworkSupply();
+const fees = await fetchNetworkFees();
+console.log({ supply, fees });
+})();
